@@ -179,6 +179,36 @@ Status CopyMatrix(CLMatrix M, CLMatrix *T)
     
 }
 
+Status FindPos(CLMatrix *Q, LNode *p, LNode *q, LNode *r)
+{
+    LNode *s;
+    if(!Q->rowhead[r->row].right){
+        Q->rowhead[r->row].right = r;
+        r->right = NULL;
+    }
+    else{
+        s = Q->rowhead[r->row].right;
+        while(s->right){
+            s = s->right;
+        }
+        s->right = r;
+        r->right = NULL;
+    }
+    if(!Q->colhead[r->col].down){
+        Q->colhead[r->col].down = r;
+        r->down = NULL;
+    }
+    else{
+        s = Q->colhead[r->col].down;
+        while(s->down){
+            s = s->down;
+        }
+        s->down = r;
+        r->down = NULL;
+    }
+    return OK;
+}
+
 Status AddMatrix(CLMatrix M, CLMatrix N, CLMatrix *Q)
 {
     if(M.Rows != N.Rows || M.Cols != N.Cols)return ERROR;
@@ -203,74 +233,27 @@ Status AddMatrix(CLMatrix M, CLMatrix N, CLMatrix *Q)
         p = M.rowhead[i].right;
         q = N.rowhead[i].right;
         while(p || q){
+            r = (LNode*)malloc(sizeof(LNode));
             if(p && q && p->col == q->col){
-                r = (LNode*)malloc(sizeof(LNode));
                 r->row = p->row;
                 r->col = p->col;
                 r->e = p->e + q->e;
-                if(!Q->rowhead[r->row].right)Q->rowhead[r->row].right = r;
-                else{
-                    s = Q->rowhead[r->row].right;
-                    while(s){
-                        s = s->right;
-                    }
-                    s->right = r;
-                }
-                if(!Q->colhead[r->col].down)Q->colhead[r->col].down = r;
-                else{
-                    s = Q->colhead[r->col].down;
-                    while(s){
-                        s = s->down;
-                    }
-                    s->down = r;
-                }
+                FindPos(Q, p, q, r);
                 p = p->right;
                 q = q->right;
             }
             else if((p && q && p->col < q->col) || (p && !q)){
-                r = (LNode*)malloc(sizeof(LNode));
                 r->row = p->row;
                 r->col = p->col;
                 r->e = p->e;
-                if(!Q->rowhead[r->row].right)Q->rowhead[r->row].right = r;
-                else{
-                    s = Q->rowhead[r->row].right;
-                    while(s){
-                        s = s->right;
-                    }
-                    s->right = r;
-                }
-                if(!Q->colhead[r->col].down)Q->colhead[r->col].down = r;
-                else{
-                    s = Q->colhead[r->col].down;
-                    while(s){
-                        s = s->down;
-                    }
-                    s->down = r;
-                }
+                FindPos(Q, p, q, r);
                 p = p->right;
             }
-            else if(p && q && p->col > q->col || (q && !p)){
-                r = (LNode*)malloc(sizeof(LNode));
+            else if((p && q && p->col > q->col) || (q && !p)){
                 r->row = q->row;
                 r->col = q->col;
                 r->e = q->e;
-                if(!Q->rowhead[r->row].right)Q->rowhead[r->row].right = r;
-                else{
-                    s = Q->rowhead[r->row].right;
-                    while(s){
-                        s = s->right;
-                    }
-                    s->right = r;
-                }
-                if(!Q->colhead[r->col].down)Q->colhead[r->col].down = r;
-                else{
-                    s = Q->colhead[r->col].down;
-                    while(s){
-                        s = s->down;
-                    }
-                    s->down = r;
-                }
+                FindPos(Q, p, q, r);
                 q = q->right;
             }
             Q->Nums++;

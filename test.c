@@ -1,11 +1,15 @@
-#include "Cross_List_Matrix.h"
+#include "String.h"
 
 int main()
 {
-    CLMatrix M1, M2, M3;
-    CreatMatrix(&M1);
-    CreatMatrix(&M2);
-    AddMatrix(M1, M2, &M3);
-    PrintMatrix(M3);
+    string a, b, c;
+    StrInit(&a);
+    StrAssign(&a);
+    StrInit(&b);
+    StrAssign(&b);
+    StrInit(&c);
+    StrAssign(&c);
+    Replace(&a, b, c);
+    StrPrint(a);
     return 0;
 }
